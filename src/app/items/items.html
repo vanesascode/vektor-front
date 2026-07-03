@@ -1,0 +1,48 @@
+<section class="items" aria-label="items">
+  <h2>&gt; items_</h2>
+
+  @if (error(); as msg) {
+    <p class="error" role="alert">{{ msg }}</p>
+  }
+
+  <form class="row" (ngSubmit)="create()">
+    <input
+      name="name"
+      [(ngModel)]="newName"
+      placeholder="nombre"
+      required
+      aria-label="Nombre del nuevo item"
+    />
+    <input
+      name="description"
+      [(ngModel)]="newDescription"
+      placeholder="descripción (opcional)"
+      aria-label="Descripción del nuevo item"
+    />
+    <button type="submit">añadir</button>
+  </form>
+
+  <ul>
+    @for (item of items(); track item.id) {
+      <li class="row">
+        @if (editingId() === item.id) {
+          <input name="edit-name" [(ngModel)]="editName" aria-label="Editar nombre" />
+          <input
+            name="edit-description"
+            [(ngModel)]="editDescription"
+            aria-label="Editar descripción"
+          />
+          <button type="button" (click)="saveEdit(item.id)">guardar</button>
+          <button type="button" (click)="cancelEdit()">cancelar</button>
+        } @else {
+          <span class="name">{{ item.name }}</span>
+          <span class="description">{{ item.description }}</span>
+          <button type="button" (click)="startEdit(item)">editar</button>
+          <button type="button" (click)="remove(item.id)">borrar</button>
+        }
+      </li>
+    } @empty {
+      <li class="empty">// sin items todavía</li>
+    }
+  </ul>
+</section>

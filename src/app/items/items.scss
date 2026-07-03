@@ -1,0 +1,73 @@
+.items {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+  font-family: var(--font-terminal);
+
+  h2 {
+    color: var(--accent);
+    font-weight: 400;
+  }
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: inherit;
+
+  &:focus {
+    outline: 1px solid var(--accent);
+  }
+}
+
+button {
+  padding: 0.45rem 0.8rem;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.name {
+  color: var(--fg);
+}
+
+.description {
+  flex: 1;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--muted);
+}
+
+.error {
+  color: #f66;
+  border: 1px dashed #f66;
+  padding: 0.5rem;
+}

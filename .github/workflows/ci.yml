@@ -1,0 +1,94 @@
+# CI/CD de vektor-front.
+#
+# - PRs y pushes a dev/master: calidad (ESLint + tests unitarios + build).
+# - Push a dev    -> build imagen y deploy al entorno dev.
+# - Push a master -> build imagen y deploy a prod (GitHub Environment "prod"
+#                    con aprobación manual, configurado en Settings > Environments).
+#
+# Autenticación con Azure vía OIDC federado: no se almacena ningún secreto,
+# solo las variables (Settings > Variables) AZURE_CLIENT_ID, AZURE_TENANT_ID,
+# AZURE_SUBSCRIPTION_ID y ACR_NAME.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, test y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Tests unitarios (Chrome headless)
+        run: pnpm test
+
+      - name: Build de producción
+        run: pnpm build --configuration production
+
+  deploy:
+    name: Deploy a Azure Container Apps
+    needs: quality
+    # Solo despliega en push directo/merge a las ramas de entorno, nunca en PR.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # master -> environment prod (con required reviewers), dev -> environment dev.
+    environment: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+    permissions:
+      contents: read
+      id-token: write # necesario para el login OIDC sin secretos
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolver entorno según rama
+        id: env
+        run: |
+          if [ "${{ github.ref_name }}" = "master" ]; then
+            echo "name=prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # az acr build construye la imagen en Azure (no hace falta Docker en el runner)
+      # y la etiqueta con el SHA del commit: trazabilidad exacta commit <-> despliegue.
+      - name: Build y push de la imagen
+        run: |
+          az acr build \
+            --registry ${{ vars.ACR_NAME }} \
+            --image vektor-front:${{ github.sha }} \
+            .
+
+      # Actualiza solo la imagen de la Container App; la infraestructura
+      # la gestiona Terraform (vektor-infra), que ignora cambios de imagen.
+      - name: Actualizar Container App
+        run: |
+          az containerapp update \
+            --name ca-vektor-front \
+            --resource-group rg-vektor-${{ steps.env.outputs.name }} \
+            --image ${{ vars.ACR_NAME }}.azurecr.io/vektor-front:${{ github.sha }}

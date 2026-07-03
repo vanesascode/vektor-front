@@ -1,0 +1,22 @@
+/* Tema global: terminal oscura estilo Mr. Robot.
+   Fuente monospace del sistema (sin CDNs externos en runtime);
+   si se quiere más fidelidad, añadir una fuente libre vía @font-face local. */
+
+:root {
+  --bg: #0a0c0a;
+  --fg: #e6ffe6;
+  --accent: #00cc66;
+  --muted: #5a6e5a;
+  --border: #2a3a2a;
+  --font-terminal: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-terminal);
+}

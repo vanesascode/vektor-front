@@ -1,0 +1,70 @@
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 55vh;
+}
+
+// Título estilo Mr. Robot: bloque industrial rojo/negro + glitch RGB-split recoloreado.
+.glitch {
+  position: relative;
+  margin: 0;
+  font-family: 'Arial Black', 'Segoe UI Black', 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(4rem, 18vw, 14rem);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: #e8232a;
+  text-transform: uppercase;
+  animation: flicker 4s infinite;
+  -webkit-text-stroke: 3px #000;
+  text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+
+  &::before,
+  &::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    -webkit-text-stroke: 3px #000;
+  }
+
+  &::before {
+    color: #ff4d4d;
+    animation: glitch-shift 2.5s infinite linear alternate-reverse;
+    clip-path: inset(20% 0 55% 0);
+  }
+
+  &::after {
+    color: #000;
+    animation: glitch-shift 3.1s infinite linear alternate;
+    clip-path: inset(60% 0 10% 0);
+  }
+}
+
+@keyframes glitch-shift {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3px, -1px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(2px, 1px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: 0.4; }
+  98% { opacity: 0.9; }
+  99% { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch,
+  .glitch::before,
+  .glitch::after {
+    animation: none;
+  }
+}

@@ -1,0 +1,7 @@
+<section class="hero" aria-label="brand">
+  @if (brand(); as b) {
+    <h1 class="glitch" [attr.data-text]="b.text">{{ b.text }}</h1>
+  } @else {
+    <h1 class="glitch loading" data-text="......">......</h1>
+  }
+</section>
