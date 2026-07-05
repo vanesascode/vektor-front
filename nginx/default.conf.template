@@ -19,6 +19,10 @@ server {
         proxy_set_header Host $proxy_host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+
+        # El ingress interno de Container Apps enruta por SNI: sin esto,
+        # nginx no lo envía al backend HTTPS y el handshake falla (502).
+        proxy_ssl_server_name on;
     }
 
     # Cache agresiva para estáticos con hash en el nombre.
